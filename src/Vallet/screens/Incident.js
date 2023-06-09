@@ -7,6 +7,7 @@ import {
   TextInput,
   ScrollView,
   Alert,
+  KeyboardAvoidingView,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import * as ImagePicker from "expo-image-picker";
@@ -266,202 +267,204 @@ export default function Incident() {
     <>
       {!isloading && !uploading && (
         <SafeAreaView style={styles.container}>
-          <ScrollView>
-            <View style={styles.nav}>
-              <TouchableOpacity>
-                <View
-                  style={{
-                    // backgroundColor: "pink",
-                    width: "25%",
-                    height: 50,
-                  }}
-                  onPress={() => navigation.navigate("TabNavigation")}
-                >
-                  <Back
-                    style={styles.back}
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={{ flex: 1 }}
+          >
+            <ScrollView>
+              <View style={styles.nav}>
+                <TouchableOpacity>
+                  <View
+                    style={{
+                      // backgroundColor: "pink",
+                      width: "25%",
+                      height: 50,
+                    }}
                     onPress={() => navigation.navigate("TabNavigation")}
-                  />
-                </View>
-              </TouchableOpacity>
-              {loaded ? (
-                <Text style={styles.text1}>Create Incident Report</Text>
-              ) : (
-                ""
-              )}
-            </View>
-            <View style={styles.greyline}></View>
-            <View>
-              <View style={styles.camerabox}>
-                <TouchableOpacity style={styles.iconbox} onPress={pickImage}>
-                  <View>
-                    <AntDesign name="upload" size={24} color="#246BFD" />
+                  >
+                    <Back
+                      style={styles.back}
+                      onPress={() => navigation.navigate("TabNavigation")}
+                    />
                   </View>
                 </TouchableOpacity>
-                {loaded ? <Text style={styles.text4}>Upload Image</Text> : ""}
                 {loaded ? (
-                  <Text style={styles.text3}>Choose file to be uploaded</Text>
+                  <Text style={styles.text1}>Create Incident Report</Text>
                 ) : (
                   ""
                 )}
               </View>
-              {image && (
-                <View
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
+              <View style={styles.greyline}></View>
+              <View>
+                <TouchableOpacity style={styles.camerabox} onPress={pickImage}>
+                  <TouchableOpacity style={styles.iconbox} onPress={pickImage}>
+                    <View>
+                      <AntDesign name="upload" size={24} color="#246BFD" />
+                    </View>
+                  </TouchableOpacity>
+                  {loaded ? <Text style={styles.text4}>Upload Image</Text> : ""}
+                  {loaded ? (
+                    <Text style={styles.text3}>Choose file to be uploaded</Text>
+                  ) : (
+                    ""
+                  )}
+                </TouchableOpacity>
+                {image && (
+                  <View
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Image
+                      source={source}
+                      style={{
+                        width: "90%",
+                        height: 200,
+                        marginTop: "5%",
+                        marginBottom: "5%",
+                        borderRadius: 8,
+                        resizeMode: "contain",
+                      }}
+                    />
+                  </View>
+                )}
+
+                <Formik
+                  initialValues={{
+                    apartment: "",
+                    other: "",
+                    issue: "",
+                  }}
+                  validationSchema={incidentValidationSchema}
+                  onSubmit={(values) => {
+                    if (!statename) {
+                      return Alert.alert("Please Select a State!");
+                    }
+                    if (!cityname) {
+                      return Alert.alert("Please Select a City Name!");
+                    }
+                    if (!propertyname) {
+                      return Alert.alert("Please Select a Property!");
+                    }
+
+                    (values.statename = statename),
+                      (values.cityname = cityname),
+                      (values.propertyname = propertyname),
+                      (values.Incidentimage = `${imageUrl ? imageUrl : ""}`);
+                    // console.log(values);
+                    setIsloading(true);
+                    saveIncident(values);
                   }}
                 >
-                  <Image
-                    source={source}
-                    style={{
-                      width: "90%",
-                      height: 200,
-                      marginTop: "5%",
-                      marginBottom: "5%",
-                      borderRadius: 8,
-                      resizeMode: "contain",
-                    }}
-                  />
-                </View>
-              )}
-
-              <Formik
-                initialValues={{
-                  apartment: "",
-                  other: "",
-                  issue: "",
-                }}
-                validationSchema={incidentValidationSchema}
-                onSubmit={(values) => {
-                  if (!statename) {
-                    return Alert.alert("Please Select a State!");
-                  }
-                  if (!cityname) {
-                    return Alert.alert("Please Select a City Name!");
-                  }
-                  if (!propertyname) {
-                    return Alert.alert("Please Select a Property!");
-                  }
-
-                  (values.statename = statename),
-                    (values.cityname = cityname),
-                    (values.propertyname = propertyname),
-                    (values.Incidentimage = `${imageUrl ? imageUrl : ""}`);
-                  // console.log(values);
-                  setIsloading(true);
-                  saveIncident(values);
-                }}
-              >
-                {({ handleChange, handleSubmit, errors }) => (
-                  <>
-                    <View style={styles.inputview}>
-                      {loaded ? <Text style={styles.text2}>State</Text> : ""}
-                      <SelectList
-                        setSelected={(val) => setstatename(val)}
-                        data={state}
-                        boxStyles={styles.input}
-                        placeholder="State"
-                        inputStyles={{
-                          fontFamily: "CircularStd",
-                          width: "80%",
-                          alignSelf: "center",
-                        }}
-                        dropdownTextStyles={{ fontFamily: "CircularStd" }}
-                        dropdownStyles={{
-                          width: "90%",
-                          alignSelf: "center",
-                        }}
-                      />
-                    </View>
-                    <View style={styles.inputview}>
-                      {loaded ? <Text style={styles.text2}>City</Text> : ""}
-                      <SelectList
-                        setSelected={(val) => setcityname(val)}
-                        data={city}
-                        boxStyles={styles.input}
-                        placeholder="City"
-                        inputStyles={{
-                          fontFamily: "CircularStd",
-                          width: "80%",
-                          alignSelf: "center",
-                        }}
-                        dropdownTextStyles={{ fontFamily: "CircularStd" }}
-                        dropdownStyles={{
-                          width: "90%",
-                          alignSelf: "center",
-                          borderColor: "grey",
-                        }}
-                      />
-                    </View>
-                    <View style={styles.inputview}>
-                      {loaded ? <Text style={styles.text2}>Property</Text> : ""}
-                      <SelectList
-                        setSelected={(val) => setpropertyname(val)}
-                        data={properties}
-                        boxStyles={styles.input}
-                        placeholder="Property"
-                        inputStyles={{
-                          fontFamily: "CircularStd",
-                          width: "80%",
-                          alignSelf: "center",
-                        }}
-                        dropdownTextStyles={{ fontFamily: "CircularStd" }}
-                        dropdownStyles={{
-                          width: "90%",
-                          alignSelf: "center",
-                        }}
-                      />
-                    </View>
-                    {loaded ? (
-                      <Text style={styles.text2}>Apartment # (Optional)</Text>
-                    ) : (
-                      ""
-                    )}
-                    <TextInput
-                      placeholder="Enter Apartment Number"
-                      style={styles.input}
-                      onChangeText={handleChange("apartment")}
-                    />
-
-                    {loaded ? <Text style={styles.text2}>Other</Text> : ""}
-                    <TextInput
-                      placeholder="Type Here..."
-                      onChangeText={handleChange("other")}
-                      style={styles.input2}
-                      multiline={true}
-                    />
-                    {loaded ? <Text style={styles.text2}>Issue</Text> : ""}
-                    <TextInput
-                      placeholder="Type Here..."
-                      style={styles.input2}
-                      multiline={true}
-                      onChangeText={handleChange("issue")}
-                    />
-                    {errors.issue && (
-                      <Text style={styles.error}>{errors.issue}</Text>
-                    )}
-
-                    <View style={styles.button}>
-                      <TouchableOpacity
-                        style={styles.getstarted}
-                        onPress={handleSubmit}
-                      >
+                  {({ handleChange, handleSubmit, errors }) => (
+                    <>
+                      <View style={styles.inputview}>
+                        {loaded ? <Text style={styles.text2}>State</Text> : ""}
+                        <SelectList
+                          setSelected={(val) => setstatename(val)}
+                          data={state}
+                          boxStyles={styles.input}
+                          placeholder="State"
+                          inputStyles={{
+                            fontFamily: "CircularStd",
+                            width: "80%",
+                            alignSelf: "center",
+                          }}
+                          dropdownTextStyles={{ fontFamily: "CircularStd" }}
+                          dropdownStyles={{
+                            width: "90%",
+                            alignSelf: "center",
+                          }}
+                        />
+                      </View>
+                      <View style={styles.inputview}>
+                        {loaded ? <Text style={styles.text2}>City</Text> : ""}
+                        <SelectList
+                          setSelected={(val) => setcityname(val)}
+                          data={city}
+                          boxStyles={styles.input}
+                          placeholder="City"
+                          inputStyles={{
+                            fontFamily: "CircularStd",
+                            width: "80%",
+                            alignSelf: "center",
+                          }}
+                          dropdownTextStyles={{ fontFamily: "CircularStd" }}
+                          dropdownStyles={{
+                            width: "90%",
+                            alignSelf: "center",
+                            borderColor: "grey",
+                          }}
+                        />
+                      </View>
+                      <View style={styles.inputview}>
                         {loaded ? (
-                          <Text style={styles.getstartedtext}>
-                            Create Incident Report
-                          </Text>
+                          <Text style={styles.text2}>Property</Text>
                         ) : (
                           ""
                         )}
-                      </TouchableOpacity>
-                    </View>
-                  </>
-                )}
-              </Formik>
-            </View>
-          </ScrollView>
-          <View style={{ height: 30 }}></View>
+                        <SelectList
+                          setSelected={(val) => setpropertyname(val)}
+                          data={properties}
+                          boxStyles={styles.input}
+                          placeholder="Property"
+                          inputStyles={{
+                            fontFamily: "CircularStd",
+                            width: "80%",
+                            alignSelf: "center",
+                          }}
+                          dropdownTextStyles={{ fontFamily: "CircularStd" }}
+                          dropdownStyles={{
+                            width: "90%",
+                            alignSelf: "center",
+                          }}
+                        />
+                      </View>
+                      {loaded ? (
+                        <Text style={styles.text2}>Apartment # (Optional)</Text>
+                      ) : (
+                        ""
+                      )}
+                      <TextInput
+                        placeholder="Enter Apartment Number"
+                        style={styles.input}
+                        onChangeText={handleChange("apartment")}
+                      />
+
+                      {loaded ? <Text style={styles.text2}>Issue</Text> : ""}
+                      <TextInput
+                        placeholder="Type Here..."
+                        style={styles.input2}
+                        multiline={true}
+                        onChangeText={handleChange("issue")}
+                      />
+                      {errors.issue && (
+                        <Text style={styles.error}>{errors.issue}</Text>
+                      )}
+
+                      <View style={styles.button}>
+                        <TouchableOpacity
+                          style={styles.getstarted}
+                          onPress={handleSubmit}
+                        >
+                          {loaded ? (
+                            <Text style={styles.getstartedtext}>
+                              Create Incident Report
+                            </Text>
+                          ) : (
+                            ""
+                          )}
+                        </TouchableOpacity>
+                      </View>
+                    </>
+                  )}
+                </Formik>
+              </View>
+            </ScrollView>
+            <View style={{ height: 30 }}></View>
+          </KeyboardAvoidingView>
         </SafeAreaView>
       )}
       {isloading && !uploading && <Loader title={"Processing...!"} />}
